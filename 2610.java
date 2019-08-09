@@ -72,4 +72,3 @@ public class Main {
 			System.out.println(i);
 	}
 }
-//Âü°í : https://www.acmicpc.net/board/view/16286
