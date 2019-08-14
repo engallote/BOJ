@@ -1,99 +1,173 @@
 import java.util.*;
- 
+
 public class Main {
-    static int N, M, T, res;
-    static int[][] arr, index, map;
-    static int[] dx = {0, -1, 1, 0, 0}, dy = {0, 0, 0, 1, -1};
-    static ArrayList<Pair> shark = new ArrayList<>();
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        N = sc.nextInt();
-        M = sc.nextInt();
-        T = sc.nextInt();
-        arr = new int[N+1][M+1];
-        index = new int[N+1][M+1];
-        map = new int[N+1][M+1];
-        int idx = 0;
-        for(int i = 0; i < T; i++)
-        {
-        	int x = sc.nextInt();
-        	int y = sc.nextInt();
-        	int s = sc.nextInt();
-        	int d = sc.nextInt();
-        	int size = sc.nextInt();
-        	arr[x][y] = size;
-        	index[x][y] = idx++; 
-        	shark.add(new Pair(x, y, s, d, size));
-        }
-        boolean[] chk = new boolean[idx];
-        Queue<Pair> q = new LinkedList<>();
-        int res = 0;
-        for(int j = 1; j <= M; j++)
-        {
-        	//ªÛæÓ ¿‚±‚
-        	for(int i = 1; i <= N; i++)
-        		if(arr[i][j] != 0)
-        		{
-        			res += arr[i][j];
-        			arr[i][j] = 0;
-        			chk[index[i][j]] = true;//¥ı ¿ÃªÛ ƒ´øÓ∆Æ «œ¡ˆ æ ±‚ ¿ß«ÿ
-        			break;
-        		}
-        	for(int i = 1; i <= N; i++)
-        	{
-        		Arrays.fill(arr[i], 0);
-        		Arrays.fill(index[i], 0);
-        	}
-        	
-        	//ªÛæÓ ¿Ãµø
-        	for(int k = 0; k < shark.size(); k++)
-        	{
-        		if(chk[k]) continue; 
-        		Pair p = shark.get(k);
-        		int speed = p.speed, x = p.x, y = p.y, d = p.dir;
-        		for(int s = 0; s < speed; s++)
-        		{
-        			if(x + dx[d] < 1 || x + dx[d] > N || y + dy[d] < 1 || y + dy[d] > M)
-        			{
-        				if(d <= 2) d = (d == 1) ? 2 : 1;
-        				else d = (d == 3) ? 4 : 3;
-        			}
-        			x += dx[d];
-        			y += dy[d];
-//        			System.out.println(x + " " + y);
-        		}
-        		shark.get(k).x = x;
-        		shark.get(k).y = y;
-        		shark.get(k).dir = d;
-        		if(arr[x][y] != 0)//¿ÃπÃ ¬˜¡ˆ«œ∞Ì ¿÷¥¬ ªÛæÓ∞° ¿÷¥Ÿ
-        		{
-        			if(arr[x][y] < p.size)//¿Ã ªÛæÓ∞° ¥ı ≈©¥Ÿ
-        			{
-        				arr[x][y] = p.size;
-        				chk[index[x][y]] = true;
-        				index[x][y] = k;
-        			}
-        			else
-        				chk[k] = true;
-        		}
-        		else
-        		{
-        			arr[x][y] = p.size;
-        			index[x][y] = k;
-        		}
-        	}
-        }
-        System.out.println(res);
-    }
+	public static void main(String[] args) {
+		Scanner sc = new Scanner(System.in);
+		int N = sc.nextInt();
+		int M = sc.nextInt();
+		int S = sc.nextInt();
+		Queue<Pair>[] q = new LinkedList[M+1];
+		Queue<Pair> tmp = new LinkedList<Pair>();
+		PriorityQueue<Pair>[][] arr = new PriorityQueue[N + 1][M + 1];
+		for(int i = 1; i <= M; i++)
+			q[i] = new LinkedList<Pair>();
+		
+		for(int i = 1; i <= N; i++)
+			for(int j = 1; j <= M; j++)
+				arr[i][j] = new PriorityQueue<>();
+		
+		
+		for(int i = 0; i < S; i++)
+		{
+			int r = sc.nextInt();
+			int c = sc.nextInt();
+			int s = sc.nextInt();
+			int d = sc.nextInt();
+			int z = sc.nextInt();
+			q[c].offer(new Pair(i, r, c, s, d, z));
+		}
+		
+		int size = 0, res = 0;
+		for(int i = 1; i <= M; i++)//Ïò§Î•∏Ï™ΩÏúºÎ°ú Ïù¥Îèô
+		{
+			size = q[i].size();
+			while(size > 0)
+			{
+				Pair p = q[i].poll();
+				
+				if(tmp.isEmpty()) tmp.offer(p);
+				else
+				{
+					if(tmp.peek().r < p.r) q[i].offer(p);
+					else
+					{
+						q[i].offer(tmp.poll());
+						tmp.offer(p);
+					}
+				}
+				size--;
+			}
+			
+			if(!tmp.isEmpty())
+				res += tmp.poll().z;//Ïû°ÏùÄ ÏÉÅÏñ¥ ÌÅ¨Í∏∞ ÎçîÌïòÍ∏∞
+			
+			//ÏÉÅÏñ¥ Ïù¥Îèô
+			for(int j = 1; j <= M; j++)
+				if(!q[j].isEmpty())
+				{
+					size = q[j].size();
+					while(size > 0)
+					{
+						Pair p = q[j].poll();
+						
+						if(p.s == 0)//ÏÜçÎèÑ ÏóÜÏùå
+							arr[p.r][p.c].offer(p);
+						else
+						{
+							int speed = p.s, r = p.r, c = p.c, d = p.d;
+							if(d == 1 || d == 2)
+							{
+								while(speed > 0)
+								{
+									if(d == 1)
+									{
+										if(speed >= r - 1)
+										{
+											speed -= r - 1;
+											r = 1;
+											d = 2;
+										}
+										else
+										{
+											r -= speed;
+											break;
+										}
+									}
+									else
+									{
+										if(speed >= N - r)
+										{
+											speed -= N - r;
+											r = N;
+											d = 1;
+										}
+										else
+										{
+											r += speed;
+											break;
+										}
+									}
+								}
+							}
+							else
+							{
+								while(speed > 0)
+								{
+									if(d == 4)
+									{
+										if(speed >= c - 1)
+										{
+											speed -= c - 1;
+											c = 1;
+											d = 3;
+										}
+										else
+										{
+											c -= speed;
+											break;
+										}
+									}
+									else
+									{
+										if(speed >= M - c)
+										{
+											speed -= M - c;
+											c = M;
+											d = 4;
+										}
+										else
+										{
+											c += speed;
+											break;
+										}
+									}
+								}
+							}
+							arr[r][c].add(new Pair(p.idx, r, c, p.s, d, p.z));
+						}
+						size--;
+					}//while
+				}
+			
+			//ÏÉÅÏñ¥ Í≤πÏπòÎäî Ïï†Îì§ÎÅºÎ¶¨ Ïû°ÏïÑÎ®πÍ∏∞
+			for(int k = 1; k <= N; k++)
+			{
+				for(int j = 1; j <= M; j++)
+				{
+					if(arr[k][j].isEmpty()) continue;
+					
+					q[j].offer(arr[k][j].poll());
+					arr[k][j].clear();
+				}
+			}
+		}
+		System.out.println(res);
+	}
 }
-class Pair{
-	int x, y, speed, dir, size;
-	Pair(int x, int y, int speed, int dir, int size)
-	{
-		this.x = x;
-		this.y = y;
-		this.speed = speed;
-		this.dir = dir;
-		this.size = size;
+class Pair implements Comparable<Pair>{
+	int idx, r, c, s, d, z;
+	Pair(int idx, int r, int c, int s, int d, int z){
+		this.idx = idx;
+		this.r = r;
+		this.c = c;
+		this.s = s;
+		this.d = d;
+		this.z = z;
+	}
+	@Override
+	public int compareTo(Pair o) {
+		if(o.z > this.z) return 1;
+		else if(o.z == this.z) return 0;
+		return -1;
 	}
 }
