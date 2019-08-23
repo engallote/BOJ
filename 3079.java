@@ -6,27 +6,35 @@ public class Main {
 		int N = sc.nextInt();
 		long M = sc.nextLong();
 		long[] arr = new long[N];
+		
 		for(int i = 0; i < N; i++)
 			arr[i] = sc.nextLong();
+		
 		Arrays.sort(arr);
 		
-		long l = 0, h = M * arr[N-1], mid, res = h, sum;
-		
-		while(l <= h)
+		if(N == 1)
+			System.out.println(N*M);
+		else if(M == 1)
+			System.out.println(arr[0]);
+		else
 		{
-			mid = (l + h) / 2;
+			long l = 0, h = 987654321987654l, res = Long.MAX_VALUE;
 			
-			sum = 0;
-			for(int i = 0; i < N; i++)
-				sum += mid / arr[i];
-			
-			if(sum >= M)
+			while(l <= h)
 			{
-				res = Math.min(res, mid);
-				h = mid - 1;
+				long mid = (l + h) / 2;
+				long sum = 0;
+				
+				for(int i = 0; i < N; i++)
+					sum += mid / arr[i];
+				if(sum >= M)
+				{
+					res = Math.min(res, mid);
+					h = mid - 1;
+				}
+				else l = mid + 1;
 			}
-			else l = mid + 1;
+			System.out.println(res);
 		}
-		System.out.println(res);
 	}
 }
