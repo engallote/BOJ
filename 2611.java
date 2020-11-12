@@ -1,75 +1,73 @@
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.*;
 
 public class Main {
-	public static void main(String[] args) {
-		Scanner sc = new Scanner(System.in);
-		int N = sc.nextInt();
-		int M = sc.nextInt();
+	static int N;
+	static ArrayList<Pair>[] arr;
+	static int[] par, chk, indgree;
+	public static void main(String[] args) throws IOException {
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
+		N = Integer.parseInt(br.readLine());
+		int M = Integer.parseInt(br.readLine());
+		arr = new ArrayList[N + 1];
+		chk = new int[N + 1];
+		par = new int[N + 1];
+		indgree = new int[N + 1];
 		
-		ArrayList<Pair>[] arr = new ArrayList[N+1];
 		for(int i = 1; i <= N; i++)
 			arr[i] = new ArrayList<>();
 		
-		for(int i = 0; i < M; i++)
-		{
-			int a = sc.nextInt();
-			int b = sc.nextInt();
-			int c = sc.nextInt();
+		StringTokenizer st;
+		for(int i = 0; i < M; i++) {
+			st = new StringTokenizer(br.readLine());
+			int a = Integer.parseInt(st.nextToken());
+			int b = Integer.parseInt(st.nextToken());
+			int c = Integer.parseInt(st.nextToken());
 			arr[a].add(new Pair(b, c));
+			++indgree[b];
 		}
 		
-		for(int i = 1; i <= N; i++)
-			Collections.sort(arr[i]);
-		PriorityQueue<Pair> pq = new PriorityQueue<>();
-		pq.add(new Pair(1, 0, "1 "));
-		boolean[][] pass = new boolean[N+1][N+1];
-		int[] chk = new int[N+1];
-		chk[1] = -1;
-		int res = 0;
-		String path = "";
-		while(!pq.isEmpty())
-		{
-			Pair p = pq.poll();
-//			System.out.println(p.v + " " + p.c + " " + p.str);
-			if(p.v == 1 && chk[p.v] > -1)
-			{
-				if(res < p.c)
-				{
-					res = p.c;
-					path = p.str.trim();
-				}
-				continue;
-			}
+		bfs();
+		
+		bw.write(chk[1]+"\n");
+		int idx = 1;
+		Stack<Integer> stack = new Stack<>();
+		stack.push(1);
+		while(par[idx] != 1) {
+			stack.push(par[idx]);
+			idx = par[idx];
+		}
+		stack.push(1);
+		while(!stack.isEmpty()) bw.write(stack.pop() + " ");
+		bw.flush();
+	}
+	private static void bfs() {
+		Queue<Integer> q = new LinkedList<>();
+		q.offer(1);
+		
+		while(indgree[1] > 0) {
+			int x = q.poll();
 			
-			for(Pair next : arr[p.v])
-			{
-				if(chk[next.v] <= p.c + next.c)
-				{
-					chk[next.v] = p.c + next.c;
-					pq.add(new Pair(next.v, chk[next.v], p.str + next.v + " "));
+			for(Pair next : arr[x]) {
+				--indgree[next.v];
+				if(chk[next.v] < chk[x] + next.w) {
+					chk[next.v] = chk[x] + next.w;
+					par[next.v] = x;
 				}
+				if(indgree[next.v] == 0) q.offer(next.v);
 			}
 		}
-		System.out.println(res);
-		System.out.println(path);
 	}
 }
-class Pair implements Comparable<Pair>{
-	int v, c;
-	String str;
-	Pair(int v, int c)
-	{
+class Pair{
+	int v, w;
+	Pair(int v, int w) {
 		this.v = v;
-		this.c = c;
-	}
-	Pair(int v, int c, String str)
-	{
-		this.v = v;
-		this.c = c;
-		this.str = str;
-	}
-	@Override
-	public int compareTo(Pair o) {
-		return o.c > this.c ? 1 : -1;
+		this.w = w;
 	}
 }
