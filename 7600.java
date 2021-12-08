@@ -1,17 +1,19 @@
 import java.util.*;
 
 public class Main {
-	public static void main(String[] args) {
-		Scanner sc = new Scanner(System.in);
-		while(true)
-		{
-			char[] c = sc.nextLine().toLowerCase().toCharArray();
-			if(c[0] == '#') break;
-			HashSet<Character> hs = new HashSet<>();
-			for(char ch : c)
-				if(ch >= 'a' && ch <= 'z') hs.add(ch);
-			
-			System.out.println(hs.size());
-		}
-	}
+    public static void main(String[] args) {
+    	Scanner sc = new Scanner(System.in);
+    	
+    	while(true) {
+    		char[] ch = sc.nextLine().toLowerCase().toCharArray();
+    		
+    		if(ch[0] == '#' && ch.length == 1) break;
+    		
+    		HashSet<Character> hs = new HashSet<>();
+    		for(char c : ch)
+    			if('a' <= c && c <= 'z') hs.add(c);
+    		
+    		System.out.println(hs.size());
+    	}
+    }
 }
